@@ -1,0 +1,88 @@
+az login
+
+# List locations
+az account list-locations -o table
+
+# 1. Create resource group
+
+az group create --name flaskapp-ud1-rg \
+    --location northcentralus
+
+
+2. Create a SQL Server
+
+az sql server create \
+--admin-user pgadmin \
+--admin-password p@ssword1234 \
+--name flaskapp-db-server \
+--resource-group flaskapp-ud1-rg \
+--location northcentralus \
+--enable-public-network true \
+--verbose
+
+
+3. Create Firewall Rules
+
+A. Allow Azure service access
+
+az sql server firewall-rule create \
+-g flaskapp-ud1-rg \
+-s flaskapp-db-server \
+-n azureaccess \
+--start-ip-address 0.0.0.0 \
+--end-ip-address 0.0.0.0 \
+--verbose
+
+B.Create clientIP firewall rule
+
+#### Use curl ifconfig.me to get your Mac IP 
+
+az sql server firewall-rule create \
+-g flaskapp-ud1-rg \
+-s flaskapp-db-server \
+-n clientip \
+--start-ip-address 73.8.221.159 \
+--end-ip-address 73.8.221.159 \
+--verbose
+
+4. Create SQL database
+
+az sql db create \
+--name flaskapp-db \
+--resource-group flaskapp-ud1-rg \
+--server flaskapp-db-server \
+--tier Basic \
+--verbose
+
+5. Create storage account
+
+az storage account create \
+ --name flaskappstorage \
+ --resource-group flaskapp-ud1-rg \
+ --location northcentralus
+
+note: storage account name will be lowercase only between 3 to 24 
+
+6. Create container
+
+az storage container create \
+ --account-name flaskappstorage \
+ --name images \
+ --auth-mode login \
+ --public-access container
+
+
+ ----------   Python ----------------
+
+Download files
+Connect to github
+
+To deploy the app on the virtual machine, I did the following:
+
+cd to FlaskWebProject
+Create venv python3 -m venv venv
+Activate the env source venv/bin/activate
+Upgrade pip in our virtual environment and then Install dependencies—pip install --upgrade pip pip install -r requirements.txt
+We'll run our app python application.py
+In a web browser, we can visit the publicIpaddress
+Type "exit" to disconnect from the VM
